@@ -878,13 +878,15 @@ install_v2ray() {
 	fi
 	ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 	[ -d /etc/v2ray ] && rm -rf /etc/v2ray
+	#sync time..
+	date -s "$(curl -sI g.cn | grep Date | cut -d' ' -f3-6)Z"
 
 	if [[ $local_install ]]; then
 		if [[ ! -d $(pwd)/config ]]; then
 			echo
 			echo -e "$red 哎呀呀...安装失败了咯...$none"
 			echo
-			echo -e " 请确保你有完整的上传 v2ray66.com 的 V2Ray 一键安装脚本 & 管理脚本到当前 ${green}$(pwd) $none目录下"
+			echo -e " 请确保你有完整的上传 233yes.com 的 V2Ray 一键安装脚本 & 管理脚本到当前 ${green}$(pwd) $none目录下"
 			echo
 			exit 1
 		fi
@@ -1434,6 +1436,14 @@ try_enable_bbr() {
 
 get_ip() {
 	ip=$(curl -s https://ipinfo.io/ip)
+	[[ -z $ip ]] && ip=$(curl -s https://api.ip.sb/ip)
+	[[ -z $ip ]] && ip=$(curl -s https://api.ipify.org)
+	[[ -z $ip ]] && ip=$(curl -s https://ip.seeip.org)
+	[[ -z $ip ]] && ip=$(curl -s https://ifconfig.co/ip)
+	[[ -z $ip ]] && ip=$(curl -s https://api.myip.com | grep -oE "([0-9]{1,3}\.){3}[0-9]{1,3}")
+	[[ -z $ip ]] && ip=$(curl -s icanhazip.com)
+	[[ -z $ip ]] && ip=$(curl -s myip.ipip.net | grep -oE "([0-9]{1,3}\.){3}[0-9]{1,3}")
+	[[ -z $ip ]] && echo -e "\n$red 这垃圾小鸡扔了吧！$none\n" && exit
 }
 
 error() {
@@ -1508,7 +1518,7 @@ show_config_info() {
 		cat >/etc/v2ray/vmess_qr.json <<-EOF
 		{
 			"v": "2",
-			"ps": "v2ray66.com_${domain}",
+			"ps": "233yes.com_${domain}",
 			"add": "${domain}",
 			"port": "443",
 			"id": "${uuid}",
@@ -1524,7 +1534,7 @@ show_config_info() {
 		cat >/etc/v2ray/vmess_qr.json <<-EOF
 		{
 			"v": "2",
-			"ps": "v2ray66.com_${ip}",
+			"ps": "233yes.com_${ip}",
 			"add": "${ip}",
 			"port": "${v2ray_port}",
 			"id": "${uuid}",
@@ -1543,10 +1553,10 @@ show_config_info() {
 	echo
 	echo -e " $yellow输入 ${cyan}v2ray${none} $yellow即可管理 V2Ray${none}"
 	echo
-	echo -e " ${yellow}V2Ray 客户端使用教程: https://v2ray66.com/post/4/$none"
+	echo -e " ${yellow}V2Ray 客户端使用教程: https://233yes.com/post/4/$none"
 	echo
 	if [[ $v2ray_transport_opt == "4" && ! $caddy ]]; then
-		echo -e " $red警告！$none$yellow请自行配置 TLS...教程: https://v2ray66.com/post/3/$none"
+		echo -e " $red警告！$none$yellow请自行配置 TLS...教程: https://233yes.com/post/3/$none"
 		echo
 	fi
 	echo "---------- V2Ray 配置信息 -------------"
@@ -1610,7 +1620,7 @@ show_config_info() {
 		echo
 	fi
 	if [ $shadowsocks ]; then
-		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#v2ray66.com_ss_${ip}"
+		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#233yes.com_ss_${ip}"
 		echo
 		echo "---------- Shadowsocks 配置信息 -------------"
 		echo
@@ -1683,7 +1693,7 @@ get_qr_link() {
 		echo $vmess | tr -d '\n' >/etc/v2ray/vmess.txt
 		cat /etc/v2ray/vmess.txt | qrencode -s 50 -o /tmp/233blog_v2ray.png
 		local link1=$(curl -s --upload-file /tmp/233blog_v2ray.png "https://transfer.sh/${random1}_v2ray666_v2ray.png")
-		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#v2ray66.com_ss_${ip}"
+		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#233yes.com_ss_${ip}"
 		echo "${ss}" >/tmp/233blog_shadowsocks.txt
 		cat /tmp/233blog_shadowsocks.txt | qrencode -s 50 -o /tmp/233blog_shadowsocks.png
 		local link2=$(curl -s --upload-file /tmp/233blog_shadowsocks.png "https://transfer.sh/${random2}_v2ray666_shadowsocks.png")
@@ -1913,7 +1923,7 @@ uninstall() {
 			echo
 			echo "如果你觉得这个脚本有哪些地方不够好的话...请告诉我"
 			echo
-			echo "反馈问题: https://github.com/233boy/v2ray/issus"
+			echo "反馈问题: https://github.com/233boy/v2ray/issues"
 			echo
 
 		elif [[ $is_uninstall_v2ray ]]; then
@@ -1957,7 +1967,7 @@ uninstall() {
 			echo
 			echo "如果你觉得这个脚本有哪些地方不够好的话...请告诉我"
 			echo
-			echo "反馈问题: https://github.com/233boy/v2ray/issus"
+			echo "反馈问题: https://github.com/233boy/v2ray/issues"
 			echo
 
 		fi
@@ -2082,7 +2092,7 @@ uninstall() {
 			echo
 			echo "如果你觉得这个脚本有哪些地方不够好的话...请告诉我"
 			echo
-			echo "反馈问题: https://github.com/233boy/v2ray/issus"
+			echo "反馈问题: https://github.com/233boy/v2ray/issues"
 			echo
 
 		elif [[ $is_uninstall_v2ray ]]; then
@@ -2131,7 +2141,7 @@ uninstall() {
 			echo
 			echo "如果你觉得这个脚本有哪些地方不够好的话...请告诉我"
 			echo
-			echo "反馈问题: https://github.com/233boy/v2ray/issus"
+			echo "反馈问题: https://github.com/233boy/v2ray/issues"
 			echo
 
 		fi
@@ -2139,7 +2149,7 @@ uninstall() {
 		echo -e "
 		$red 大胸弟...你貌似毛有安装 V2Ray ....卸载个鸡鸡哦...$none
 
-		备注...仅支持卸载使用我 (v2ray66.com) 提供的 V2Ray 一键安装脚本
+		备注...仅支持卸载使用我 (233yes.com) 提供的 V2Ray 一键安装脚本
 		" && exit 1
 	fi
 
@@ -2171,11 +2181,11 @@ esac
 clear
 while :; do
 	echo
-	echo "........... V2Ray 一键安装脚本 & 管理脚本 by v2ray66.com .........."
+	echo "........... V2Ray 一键安装脚本 & 管理脚本 by 233yes.com .........."
 	echo
-	echo "帮助说明: https://v2ray66.com/post/1/"
+	echo "帮助说明: https://233yes.com/post/1/"
 	echo
-	echo "搭建教程: https://v2ray66.com/post/2/"
+	echo "搭建教程: https://233yes.com/post/2/"
 	echo
 	echo " 1. 安装"
 	echo
